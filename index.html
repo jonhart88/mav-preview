@@ -355,11 +355,48 @@
     <div class="shell">
       <div class="panel panel-dark panel-center reveal">
         <h2 class="panel-title panel-title-sm">Tell us how you&rsquo;ll use it. We&rsquo;ll spec it for you.</h2>
-        <p class="panel-sub">Every MAV starts with a conversation. Call and talk it through, or send us the outline and we&rsquo;ll call you.</p>
-        <div class="actions actions-center">
-          <a href="build.html" class="btn btn-primary">Start a build</a>
-          <a href="tel:+17606912588" class="btn btn-ghost">Call (760) 691-2588</a>
-        </div>
+        <p class="panel-sub">Every MAV starts with a conversation. Call and talk it through, or leave the outline here and we&rsquo;ll call you.</p>
+
+        <!-- The carrier review for business texting wants one opt-in it can
+             look at: a phone field with the consent language directly beneath
+             it. The checkbox is unticked by default and the form submits
+             either way -- consent must be a choice, not the price of asking a
+             question. The CRM records which it was against the lead. -->
+        <form class="lead-form" id="leadForm" novalidate>
+          <div class="lead-row">
+            <label>Name
+              <input type="text" name="name" autocomplete="name" required>
+            </label>
+            <label>Phone
+              <input type="tel" name="phone" autocomplete="tel" inputmode="tel">
+            </label>
+          </div>
+          <label>Email
+            <input type="email" name="email" autocomplete="email">
+          </label>
+          <label>What will you tow, and where do you take it?
+            <textarea name="message" rows="3" required></textarea>
+          </label>
+          <!-- Hidden from people, tempting to bots. The server drops anything
+               that fills it in. -->
+          <div class="lead-trap" aria-hidden="true">
+            <label>Company<input type="text" name="company" tabindex="-1" autocomplete="off"></label>
+          </div>
+          <label class="lead-consent">
+            <input type="checkbox" name="smsConsent" value="yes">
+            <span>I agree to receive text messages from MAV Conversions about my inquiry.
+              Consent is not a condition of any purchase or service &mdash; if you prefer not to
+              receive texts, leave this unchecked and we will contact you another way. Message
+              frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for
+              help. <a href="privacy-policy.html">Privacy Policy</a> &middot;
+              <a href="sms-terms.html">SMS Terms</a>.</span>
+          </label>
+          <div class="actions actions-center">
+            <button type="submit" class="btn btn-primary" id="leadSend">Send it over</button>
+            <a href="tel:+17606912588" class="btn btn-ghost">Call (760) 691-2588</a>
+          </div>
+          <p class="lead-status" id="leadStatus" role="status" aria-live="polite"></p>
+        </form>
       </div>
     </div>
   </section>
@@ -799,6 +836,55 @@
 
     count.textContent = "1 / " + shots.length;
   });
+
+  // ---- Contact form ----
+  // Posts to the CRM, which records the consent checkbox against the lead as
+  // a dated audit entry. Kept deliberately plain: no library, no redirect, and
+  // the phone link beside it still works if any of this fails.
+  (function () {
+    var form = document.getElementById("leadForm");
+    if (!form) return;
+    var status = document.getElementById("leadStatus");
+    var send = document.getElementById("leadSend");
+    var ENDPOINT = "https://mav-crm-production.up.railway.app/api/chat/inquiry";
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var d = new FormData(form);
+      var name = (d.get("name") || "").toString().trim();
+      var message = (d.get("message") || "").toString().trim();
+      var phone = (d.get("phone") || "").toString().trim();
+      var email = (d.get("email") || "").toString().trim();
+      if (!name || !message) {
+        status.textContent = "Please add your name and a line about the build.";
+        status.className = "lead-status is-bad"; return;
+      }
+      if (!phone && !email) {
+        status.textContent = "Leave a phone number or an email so we can reach you.";
+        status.className = "lead-status is-bad"; return;
+      }
+      send.disabled = true;
+      status.textContent = "Sending…";
+      status.className = "lead-status";
+      fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name, phone: phone, email: email, message: message,
+          smsConsent: d.get("smsConsent") === "yes",
+          company: (d.get("company") || "").toString()
+        })
+      }).then(function (r) {
+        if (!r.ok) throw new Error(r.status);
+        form.reset();
+        status.textContent = "Got it — we’ll call you shortly.";
+        status.className = "lead-status is-good";
+      }).catch(function () {
+        status.textContent = "That did not go through. Please call (760) 691-2588 and we will pick it up there.";
+        status.className = "lead-status is-bad";
+      }).then(function () { send.disabled = false; });
+    });
+  })();
 </script>
 </body>
 </html>

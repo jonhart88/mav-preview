@@ -697,6 +697,48 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
 
 .btn-lg { padding: 18px 38px; font-size: 15.5px; }
 .panel-note { margin-top: 18px; font-size: 13.5px; color: var(--muted-d); }
+
+/* ---------- Contact form ---------- */
+/* Sits in a centered dark panel, but the fields themselves read left: a
+   centered label over a full-width input is hard to scan. */
+.lead-form { max-width: 620px; margin: 30px auto 0; text-align: left; }
+.lead-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.lead-form label {
+  display: block; margin-bottom: 14px;
+  font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted-d); font-weight: 600;
+}
+.lead-form input[type="text"], .lead-form input[type="tel"],
+.lead-form input[type="email"], .lead-form textarea {
+  display: block; width: 100%; margin-top: 7px; padding: 12px 14px;
+  font: inherit; font-size: 15px; letter-spacing: normal; text-transform: none;
+  color: #fff; background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.16); border-radius: 8px;
+}
+.lead-form textarea { resize: vertical; min-height: 84px; }
+.lead-form input:focus, .lead-form textarea:focus {
+  outline: 2px solid var(--accent); outline-offset: 1px;
+  background: rgba(255,255,255,.1); border-color: transparent;
+}
+/* The honeypot: off-screen rather than display:none, which some bots skip. */
+.lead-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+/* The consent line is the one piece of this form the carrier review reads, so
+   it stays full size and in sentence case rather than shrinking into the
+   small print it legally must not be. */
+.lead-consent {
+  display: flex; gap: 11px; align-items: flex-start;
+  margin: 4px 0 22px;
+  font-size: 13px; line-height: 1.55; letter-spacing: normal;
+  text-transform: none; font-weight: 400; color: var(--muted-d);
+}
+.lead-consent input { flex: none; width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent); }
+.lead-consent a { color: #fff; text-decoration: underline; }
+.lead-status { margin-top: 16px; font-size: 14px; min-height: 1.2em; text-align: center; color: var(--muted-d); }
+.lead-status.is-good { color: #fff; }
+.lead-status.is-bad { color: var(--accent); }
+@media (max-width: 560px) {
+  .lead-row { grid-template-columns: 1fr; gap: 0; }
+}
 .panel:not(.panel-dark) .panel-note { color: var(--muted); }
 .panel-sub + .panel-sub { margin-top: 14px; }
 
