@@ -269,6 +269,13 @@
               <path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
             </svg>
           </button>
+          <button class="film-btn" id="filmFull" type="button" aria-label="Full screen">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/>
+              <path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -517,6 +524,7 @@
   var film = document.getElementById("filmVideo");
   var playBtn = document.getElementById("filmPlay");
   var soundBtn = document.getElementById("filmSound");
+  var fullBtn = document.getElementById("filmFull");
 
   if (film && playBtn && soundBtn) {
     var pausedByHand = false;
@@ -543,6 +551,33 @@
     };
     soundBtn.addEventListener("click", function (e) { e.stopPropagation(); setSound(film.muted); });
     film.closest(".photo-card").addEventListener("click", function () { setSound(film.muted); });
+
+    // Full screen. Three different APIs, in order of how current they are.
+    // The iPhone needs the last one: Safari on iOS will not take an arbitrary
+    // element full screen, but it will take a <video>, and that is the case
+    // that matters most here -- a phone is where a band this size is most
+    // worth escaping. Hidden if the browser offers none of them.
+    if (fullBtn) {
+      var card = film.closest(".photo-card");
+      var canFull = !!(card.requestFullscreen || card.webkitRequestFullscreen
+                       || film.webkitEnterFullscreen);
+      if (!canFull) { fullBtn.hidden = true; }
+      fullBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var exit = document.fullscreenElement || document.webkitFullscreenElement;
+        if (exit) {
+          (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+          return;
+        }
+        // Going full screen is a clear "I want to watch this", so it plays --
+        // but the sound stays wherever the visitor left it rather than
+        // surprising a quiet room.
+        if (film.paused) { pausedByHand = false; film.play().catch(function () {}); }
+        if (card.requestFullscreen) { card.requestFullscreen().catch(function () {}); }
+        else if (card.webkitRequestFullscreen) { card.webkitRequestFullscreen(); }
+        else if (film.webkitEnterFullscreen) { film.webkitEnterFullscreen(); }
+      });
+    }
 
     // Start buffering while it is still two screens away, so arriving at the
     // band does not mean arriving at a spinner. Until this fires the browser

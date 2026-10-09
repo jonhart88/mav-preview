@@ -540,6 +540,25 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
 /* The card is a click target too, so it should say so. */
 .photo-card:has(.film-controls) { cursor: pointer; }
 
+/* Full screen. The card is what goes full screen rather than the bare <video>,
+   so the controls travel with it -- otherwise the browser's own chrome takes
+   over and the pause and sound buttons disappear. The card is normally a 21:9
+   crop of the footage; full screen it has to drop that and letterbox instead,
+   because cropping a film to the shape of a monitor is how you lose the top of
+   the truck. iOS is the exception: Safari hands a <video> to its own player,
+   which is fine and is what people there expect. */
+.photo-card:fullscreen,
+.photo-card:-webkit-full-screen {
+  aspect-ratio: auto; width: 100vw; height: 100vh;
+  border-radius: 0; background: #000;
+}
+.photo-card:fullscreen video,
+.photo-card:-webkit-full-screen video { object-fit: contain; }
+.photo-card:fullscreen::backdrop { background: #000; }
+/* Nudged in from the corner: full screen often means a notch or a rounded
+   display corner sitting exactly where the buttons were. */
+.photo-card:fullscreen .film-controls { top: max(24px, 4vh); right: max(24px, 3vw); }
+
 @media (max-width: 700px) { .photo-card { aspect-ratio: 16 / 9; } }
 
 /* ---------- Specs ---------- */
