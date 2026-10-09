@@ -50,12 +50,15 @@
 
 <!-- Hero: the photograph, and nothing on top of it. -->
 <header class="hero">
+  <!-- --py is each frame's vertical framing. It is a variable rather than a
+       plain object-position because the phone pans the horizontal across the
+       truck, and the keyframes have to hold the vertical where it was set. -->
   <div class="hero-media" id="heroMedia">
-    <img class="is-on" src="media/hero-1.jpg?v=2" style="object-position:50% 74%"
+    <img class="is-on" src="media/hero-1.jpg?v=2" style="--py:74%"
          alt="A MAV-converted Ford F-450" fetchpriority="high">
-    <img src="media/hero-2.jpg?v=1" style="object-position:50% 77%"
+    <img src="media/hero-2.jpg?v=1" style="--py:77%"
          alt="A MAV Summit build" loading="lazy">
-    <img src="media/hero-3.jpg?v=1" style="object-position:50% 90%"
+    <img src="media/hero-3.jpg?v=1" style="--py:90%"
          alt="A MAV Apex build" loading="lazy">
   </div>
   <!-- Manual controls, so you are never waiting out the timer to see a frame.
@@ -446,11 +449,40 @@
       frames[i].classList.add("is-on"); dots[i].classList.add("is-on");
     };
 
+    // On a portrait phone the frame is a quarter of the photo's width, so a
+    // still crop shows about a third of the truck. Rather than shrink the
+    // picture to fit, the visible window travels across it and the frame
+    // changes when it reaches the far side -- the truck stays full-bleed and
+    // you see all of it. CSS drives the travel; this only has to know when a
+    // pass has finished, which is what the animationend below is for.
+    var panQ = window.matchMedia("(max-width: 760px) and (orientation: portrait)");
+    var motionQ = window.matchMedia("(prefers-reduced-motion: reduce)");
+    var panning = function () { return panQ.matches && !motionQ.matches; };
+
     // The timer is the only part reduced-motion turns off -- the arrows are a
     // control the visitor asked for, not motion we decided to add.
-    var auto = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var start = function () { if (auto && !timer) timer = setInterval(function () { show(i + 1); }, 6000); };
+    var auto = !motionQ.matches;
+    var start = function () {
+      if (!auto || timer) return;
+      // While panning, the pass itself is the clock. A second timer running
+      // alongside it would cut frames short halfway across the truck.
+      if (panning()) return;
+      timer = setInterval(function () { show(i + 1); }, 6000);
+    };
     var stop = function () { clearInterval(timer); timer = null; };
+    // A pass ending is the cue to move on. Bound to every frame, because the
+    // one that is panning is whichever currently carries .is-on.
+    Array.prototype.forEach.call(frames, function (f) {
+      f.addEventListener("animationend", function (e) {
+        if (e.animationName === "hero-pan" && panning() && f.classList.contains("is-on")) {
+          show(i + 1);
+        }
+      });
+    });
+    // Turning the phone swaps which of the two is in charge.
+    var onModeChange = function () { stop(); start(); };
+    if (panQ.addEventListener) panQ.addEventListener("change", onModeChange);
+    else if (panQ.addListener) panQ.addListener(onModeChange);
     // Any manual move restarts the clock, so a frame you just picked gets its
     // full six seconds instead of whatever was left on the tick.
     var nudge = function (n) { return function () { stop(); show(n()); start(); }; };
