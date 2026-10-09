@@ -182,14 +182,14 @@ a { color: inherit; text-decoration: none; }
    width, so a fixed crop shows roughly a third of the truck. Instead of
    shrinking the picture into the frame, the frame travels across the picture:
    full-bleed the whole time, and you end up having seen all of it. The script
-   advances to the next frame when a pass finishes. 60% rather than 100% at the
+   advances to the next frame when a pass finishes. 92% rather than 100% at the
    end, because the last stretch of these photos is empty backdrop. */
 @keyframes hero-pan {
   from { object-position: 8% var(--py, 50%); }
   to   { object-position: 92% var(--py, 50%); }
 }
 @media (max-width: 760px) and (orientation: portrait) {
-  .hero-media img.is-on { animation: hero-pan 15s linear both; }
+  .hero-media img.is-on { animation: hero-pan 12.5s linear both; }
 }
 /* Without JS the first frame still shows rather than a blank hero. */
 html:not(.js) .hero-media img:first-child { opacity: 1; }
