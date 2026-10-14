@@ -709,14 +709,14 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
   color: var(--muted-d); font-weight: 600;
 }
 .lead-form input[type="text"], .lead-form input[type="tel"],
-.lead-form input[type="email"], .lead-form textarea {
+.lead-form input[type="email"], .lead-form textarea, .lead-form select {
   display: block; width: 100%; margin-top: 7px; padding: 12px 14px;
   font: inherit; font-size: 15px; letter-spacing: normal; text-transform: none;
   color: #fff; background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,255,255,.16); border-radius: 8px;
 }
 .lead-form textarea { resize: vertical; min-height: 84px; }
-.lead-form input:focus, .lead-form textarea:focus {
+.lead-form input:focus, .lead-form textarea:focus, .lead-form select:focus {
   outline: 2px solid var(--accent); outline-offset: 1px;
   background: rgba(255,255,255,.1); border-color: transparent;
 }
@@ -863,3 +863,267 @@ body.lb-lock { overflow: hidden; }
   .lb, .lb-img { transition: none; }
   .lb-spinner { animation: none; }
 }
+
+/* ===========================================================================
+   THE CONFIGURATOR
+
+   The window, split: the truck on the left and the questions on the right,
+   both filling the height under the nav. There is no page heading and no
+   shell -- a configurator that opens on a paragraph is a configurator you
+   have to scroll to use.
+   =========================================================================== */
+.cfg {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 440px;
+  /* An auto row sizes to its tallest child and lets it spill past the
+     container's height, which is how the stage ended up 3,500px tall chasing
+     the rail. minmax(0, 1fr) makes the row the height of the box and lets
+     both columns shrink inside it. */
+  grid-template-rows: minmax(0, 1fr);
+  /* The nav is fixed, and this is not a .band, so it gets no padding from
+     .no-hero and would otherwise start underneath it. */
+  margin-top: var(--nav-h);
+  height: calc(100vh - var(--nav-h));
+  background: var(--paper);
+}
+
+/* --- the truck ---------------------------------------------------------- */
+.cfg-stage {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  /* A tighter gutter than the rest of the site uses. This page is full-bleed
+     and the truck is the content; 40px of site margin either side is 80px the
+     photograph does not get. */
+  padding: 14px clamp(12px, 1.5vw, 26px) 16px;
+}
+.cfg-frame {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.cfg-frame img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  /* The photographs are a truck on a white sweep with its own floor shadow,
+     so they are let run as large as the box allows and the page supplies
+     nothing behind them. */
+  object-fit: contain;
+  opacity: 1;
+  transition: opacity .18s ease;
+}
+.cfg-frame.is-swapping img { opacity: 0; }
+
+/* --- arrows and dots ---------------------------------------------------- */
+.cfg-nav {
+  flex: none;
+  display: flex; align-items: center; justify-content: center; gap: 18px;
+  margin-top: 4px;
+}
+.cfg-arrow {
+  display: flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; padding: 0;
+  background: none; border: none; border-radius: 50%;
+  color: var(--ink); cursor: pointer;
+}
+.cfg-arrow:hover { background: var(--paper-2); }
+.cfg-arrow svg {
+  width: 20px; height: 20px;
+  fill: none; stroke: currentColor; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.cfg-dots { display: flex; align-items: center; gap: 9px; }
+.cfg-dot {
+  width: 8px; height: 8px; padding: 0; cursor: pointer;
+  background: var(--line); border: none; border-radius: 50%;
+  transition: background .15s ease;
+}
+.cfg-dot:hover { background: var(--muted-d); }
+.cfg-dot.is-on { background: var(--ink); }
+
+.cfg-disclaimer {
+  flex: none;
+  margin: 10px 0 0; max-width: 62ch;
+  font-size: 11.5px; line-height: 1.5; color: var(--muted);
+}
+
+/* --- the questions ------------------------------------------------------ */
+.cfg-rail {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border-left: 1px solid var(--line);
+}
+.cfg-rail-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 30px 32px 24px;
+  /* No gutter down the side of the page. The rail still scrolls -- with the
+     wheel, a trackpad, the keyboard or a touch drag -- it just does not draw
+     a bar to say so. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.cfg-rail-body::-webkit-scrollbar { width: 0; height: 0; }
+
+.cfg-head { margin-bottom: 26px; }
+/* MAV SUMMIT, MAV APEX. The negative tracking is for lower case; set in
+   capitals it closes the letters up, so it goes back to neutral. */
+.cfg-head h1 {
+  margin: 0; font-size: 31px; font-weight: 700; letter-spacing: 0;
+  line-height: 1.1; text-transform: uppercase;
+}
+
+/* The package names on their cards, to match the heading they set. Only the
+   tier cards -- every other card is a part name and reads as one. */
+.cfg-card[data-k="tier"] .cfg-name {
+  text-transform: uppercase; letter-spacing: .045em;
+}
+.cfg-head p { margin: 5px 0 0; font-size: 14px; color: var(--muted); }
+
+/* --- a question and its answers ----------------------------------------- */
+.cfg-sec { border-top: 1px solid var(--line); padding: 24px 0 4px; }
+.cfg-sec:first-child { border-top: none; padding-top: 0; }
+.cfg-sec h2 {
+  margin: 0 0 3px; font-size: 12px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--ink);
+}
+.cfg-sec .cfg-note { margin: 0 0 14px; font-size: 13px; color: var(--muted); }
+.cfg-list { display: grid; gap: 8px; }
+/* One column: the rail is 440px and a pair of cards will not sit in it. */
+.cfg-list.cfg-two { grid-template-columns: 1fr; }
+
+.cfg-card {
+  display: flex; align-items: center; gap: 13px;
+  padding: 13px 15px; text-align: left;
+  width: 100%; font: inherit; color: inherit;
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius); cursor: pointer;
+}
+.cfg-card:hover { border-color: var(--muted-d); }
+.cfg-card.is-on { border-color: var(--ink); background: var(--paper-2); }
+.cfg-card.is-on::after {
+  content: ""; flex: none; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--accent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.6 8.4l2.9 2.9 5.9-6.1' fill='none' stroke='%23fff' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 11px 11px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Locked: standard equipment, or an option this package already carries. */
+.cfg-card.is-locked { cursor: default; background: var(--paper-2); border-color: var(--line); }
+.cfg-card.is-locked:hover { border-color: var(--line); }
+.cfg-card[disabled] { opacity: .4; cursor: not-allowed; }
+.cfg-card[disabled]:hover { border-color: var(--line); }
+
+.cfg-body { flex: 1; min-width: 0; }
+.cfg-name { display: block; font-size: 14.5px; font-weight: 600; line-height: 1.3; }
+.cfg-sub { display: block; margin-top: 3px; font-size: 12.5px; line-height: 1.4; color: var(--muted); }
+.cfg-price { flex: none; font-size: 13.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.cfg-card.is-on .cfg-price { color: var(--ink); }
+.cfg-swatch {
+  flex: none; width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid rgba(0,0,0,.18); box-shadow: inset 0 1px 2px rgba(0,0,0,.25);
+}
+
+/* --- the summary -------------------------------------------------------- */
+.cfg-sum { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+.cfg-sum h2 {
+  margin: 0 0 12px; font-size: 11px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+}
+.cfg-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 13.5px; }
+.cfg-row .k { color: var(--muted); }
+.cfg-row .v { font-weight: 600; text-align: right; }
+.cfg-row.cfg-sub-row .k, .cfg-row.cfg-sub-row .v { color: var(--muted); font-weight: 400; font-size: 12.5px; }
+.cfg-total {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  margin-top: 12px; padding-top: 14px; border-top: 1.5px solid var(--ink);
+}
+.cfg-total .k { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.cfg-total .v { font-size: 27px; font-weight: 700; letter-spacing: -.01em; }
+.cfg-fine { margin: 10px 0 0; font-size: 11.5px; line-height: 1.5; color: var(--muted); }
+
+/* --- the price, always on screen ---------------------------------------- */
+.cfg-bar {
+  flex: none;
+  display: flex; align-items: center; gap: 14px;
+  padding: 15px 32px;
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+}
+.cfg-bar .cfg-bar-fig { flex: 1; min-width: 0; }
+.cfg-bar .v {
+  display: block; font-size: 25px; font-weight: 700; letter-spacing: -.01em;
+  line-height: 1.15;
+}
+.cfg-bar .cfg-bar-note { display: block; margin-top: 1px; font-size: 11px; color: var(--muted); }
+.cfg-bar .btn { flex: none; }
+
+.cfg-loading { padding: 80px var(--gut); color: var(--muted); }
+
+/* Locked, the way a car configurator is: the window holds the truck and the
+   rail, the rail scrolls inside itself, and the page behind them does not
+   move. Scrolling over the photograph does nothing, because there is nothing
+   under it to go to.
+
+   Only above the breakpoint. Stacked on a phone the page IS the scroll, and
+   locking it would strand everything below the picture.
+
+   The class is added by the engine once the catalog renders, so a page that
+   could not reach the catalog -- which falls back to a phone number and a
+   footer -- is still free to scroll. */
+@media (min-width: 1041px) {
+  body.cfg-locked { height: 100vh; overflow: hidden; }
+  /* Nothing below the fold to reach, so nothing below the fold. */
+  body.cfg-locked .band-last,
+  body.cfg-locked .footer { display: none; }
+}
+
+@media (max-width: 1040px) {
+  /* One column: the truck on top, the questions under it, and the page
+     itself does the scrolling. Nothing is a fixed height any more -- a
+     100vh split on a phone leaves a letterbox to answer questions through. */
+  .cfg { grid-template-columns: 1fr; grid-template-rows: auto; height: auto; }
+  .cfg-stage { padding: 10px var(--gut) 14px; }
+  /* No fixed shape here: the crops run from 1.8 to 2.8 and a 3:2 box would
+     letterbox every one of them. The picture sets its own height and the
+     truck gets the full width of the phone. */
+  .cfg-frame { flex: none; aspect-ratio: auto; }
+  .cfg-frame img { position: static; width: 100%; height: auto; }
+  .cfg-rail { border-left: none; border-top: 1px solid var(--line); }
+  .cfg-rail-body { overflow: visible; padding: 24px var(--gut) 24px; }
+  .cfg-head h1 { font-size: 26px; }
+  /* The bar leaves the rail and spans the window, so the total is in view
+     while you scroll the options. */
+  .cfg-bar {
+    position: fixed; inset: auto 0 0 0; z-index: 40;
+    padding: 11px var(--gut);
+    box-shadow: 0 -6px 24px rgba(0, 0, 0, .1);
+  }
+  .cfg-bar .v { font-size: 21px; }
+  .cfg-sum { padding-bottom: 78px; }
+}
+
+.cfg-bill { max-width: 620px; margin: 26px auto 0; text-align: left; }
+.cfg-bill h3 {
+  margin: 20px 0 4px; font-size: 11px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--muted-d);
+}
+.cfg-bill .cfg-row { border-bottom: 1px solid rgba(255,255,255,.1); }
+.cfg-bill .cfg-row .k { color: var(--muted-d); }
+.cfg-bill .cfg-row .v { color: #fff; }
+.cfg-bill .cfg-total { border-top-color: rgba(255,255,255,.4); }
+.cfg-bill .cfg-total .k, .cfg-bill .cfg-total .v { color: #fff; }
+.cfg-bill .cfg-fine { color: var(--muted-d); }
+
+
+/* A select inherits none of the above on its own, and a native dropdown on a
+   dark panel renders light-on-light in several browsers. */
+.lead-form select { appearance: none; -webkit-appearance: none; cursor: pointer; }
+.lead-form select option { color: #111; background: #fff; }
+/* "Optional" beside a field label: present, but not shouting like the label. */
+.cfg-opt-label { font-weight: 400; text-transform: none; letter-spacing: normal; color: var(--muted-d); }

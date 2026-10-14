@@ -10,28 +10,41 @@
 <link rel="icon" type="image/png" sizes="32x32" href="media/favicon-32.png">
 <link rel="icon" type="image/png" sizes="48x48" href="media/favicon-48.png">
 <title>Start a Build — MAV Conversions</title>
-<meta name="description" content="The MAV online configurator is coming soon. In the meantime, call us and we will spec your Ford F-450 build with you directly.">
+<meta name="description" content="Spec your Ford F-450 build: trim, color, Summit or Apex package and options, priced from the catalog we quote from.">
 
-<!-- INTERIM PAGE.
-     Every Start a Build and Configure link on the site points here until the
-     configurator is finished. The job of this page is a phone call: say plainly
-     that the configurator is not ready, give the number, and then give a
-     serious buyer enough detail on each build to want to make that call.
+<!-- THE CONFIGURATOR.
+     Every Start a Build and Configure link on the site points here.
 
-     The spec lists are the real ones, taken from the Apex build order written
-     for Carlos Leyva on 05/11/2026 -- except the tires. That order says
-     Michelin X Force 365/80/20, because tires get substituted when a size is
-     short. The Goodyear G275 is the standard fit -- 365/80R20 on the Apex,
-     335/80R20 on the Summit -- and Michelin is the fallback. The website
-     lists the standard, so an individual build order naming a different tire
-     is not a mistake in either document. Three items on that sheet were priced as
-     add-ons rather than included, so they sit under Available options here
-     instead: the 68 gallon tank, the sound deadening package and the PPF
-     color change. Summit is the same truck with 2"/2" of Liquid Spring
-     instead of 4"/4", and with the PSC hydraulic steering moved to an option.
+     Nothing on this page is a price list. The options, the prices and the
+     equipment lists are fetched from the CRM at
+     /api/configurator/catalog, which reads them out of the same build
+     catalog the written quote is figured from. The first configurator
+     hardcoded its options into the HTML and quietly went stale -- it was
+     still advertising Summit at $98,500 four months after the catalog said
+     $99,495 -- so this one holds no figures of its own.
 
-     Extra photography drops into the gallery at the bottom -- see
-     media/README.txt for the slots. -->
+     It computes nothing but addition. Prices here are before tax, title
+     and license, the same basis the printed pricing sheet quotes on, said
+     on the total itself -- so there is no estimate of anybody's county on
+     this page to go stale or be wrong.
+
+     The page has no heading and no shell on purpose. A configurator that
+     opens on a title and a paragraph is one you have to scroll before you
+     can use it, so the truck starts at the top of the window and runs the
+     width of it. What the heading said now sits where it is useful: the
+     name of the build at the top of the rail, the pricing basis under the
+     total, the photo caveat under the picture.
+
+     The photographs are of a finished truck, one set per package, and
+     nothing but the package changes them: picking Star White does not
+     repaint the Summit in the picture. That is said on the page itself,
+     under the stage, rather than left for a customer to notice. When the
+     per-color and per-bumper shots exist, PHOTOS in the engine is where
+     they go.
+
+     If the catalog cannot be reached the configurator does not render at
+     all and the page becomes the phone number, which is what it was
+     before this existed. A broken form is worse than a clear ask. -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -64,213 +77,93 @@
 
 <main>
 
-  <!-- The ask, first and unmissable. -->
-  <section class="band band-first">
+  <!-- No heading, no lede, no shell. The configurator IS the page and it
+       starts at the top of the window: a title and a paragraph above it only
+       push the truck down the screen, which is the one thing a configurator
+       cannot afford. What the heading used to say now sits where it is
+       useful -- the pricing basis on the total, the photo caveat under the
+       picture. -->
+  <div class="cfg" id="cfg" hidden>
+
+    <div class="cfg-stage">
+      <div class="cfg-frame" id="cfgFrame">
+        <img id="cfgImg" alt="" fetchpriority="high">
+      </div>
+
+      <div class="cfg-nav">
+        <button type="button" class="cfg-arrow" data-step="-1" aria-label="Previous view">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <div class="cfg-dots" id="cfgDots"></div>
+        <button type="button" class="cfg-arrow" data-step="1" aria-label="Next view">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <p class="cfg-disclaimer">
+        Photographs are of a finished MAV, not of your configuration. They change with the
+        package, but not yet with your color, bumper or options.
+      </p>
+    </div>
+
+    <div class="cfg-rail">
+      <div class="cfg-rail-body">
+        <div class="cfg-head">
+          <h1 id="cfgTitle">MAV Summit</h1>
+          <p id="cfgSubtitle">2027 Ford F-450 Crew Cab</p>
+        </div>
+
+        <div id="cfgOpts"></div>
+
+        <div class="cfg-sum">
+          <h2>Your build</h2>
+          <div id="cfgRows"></div>
+          <p class="cfg-fine" id="cfgFine"></p>
+        </div>
+      </div>
+
+      <div class="cfg-bar">
+        <span class="cfg-bar-fig">
+          <span class="v" id="cfgTotal">&mdash;</span>
+          <span class="cfg-bar-note">Plus sales tax, title &amp; license</span>
+        </span>
+        <button type="button" class="btn btn-primary" id="cfgGo">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="cfg-loading" id="cfgLoading">Loading the build catalog&hellip;</p>
+
+  <!-- If the catalog cannot be reached there is no configurator, and a
+       broken page must not be a dead end: it becomes the phone number. -->
+  <section class="band band-first" id="cfgFail" hidden>
     <div class="shell">
       <div class="panel panel-dark panel-center">
-        <p class="eyebrow on-dark">Start a build</p>
-        <h1 class="panel-title panel-title-sm">The configurator is coming soon</h1>
+        <h2 class="panel-title panel-title-sm">The configurator is not loading</h2>
         <p class="panel-sub">
-          We&rsquo;re building it properly &mdash; every option photographed in studio, so you can
-          see exactly what you&rsquo;re ordering.
-        </p>
-        <p class="panel-sub">
-          Until it&rsquo;s ready, the fastest way to spec a truck is a call. Tell us how you&rsquo;ll
-          use it and we&rsquo;ll build the spec with you.
+          Something on our end is not answering. Call and we&rsquo;ll spec it with you directly
+          &mdash; it is how every MAV got built before this page existed.
         </p>
         <div class="actions actions-center">
           <a href="tel:+17606912588" class="btn btn-primary btn-lg">(760) 691-2588</a>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- Detail, for the buyer who wants to arrive at that call informed. -->
-  <section class="band" id="builds">
-    <div class="shell">
-      <div class="pair">
-
-        <article class="panel tier">
-          <div class="tier-photo">
-            <img src="media/summit.jpg" alt="MAV Summit build" loading="lazy">
-          </div>
-          <div class="tier-body">
-            <div class="tier-head">
-              <h2 class="tier-name">Summit</h2>
-              <p class="tier-size">41&quot; tires</p>
-            </div>
-            <p class="tier-line">The tow package. Forty-one inch Goodyears, LiquidSpring smart hydraulic suspension front and rear, and a big-brake kit &mdash; built to put a boat where the ramp runs out.</p>
-            <div class="spec-set">
-              <p class="spec-head">Suspension &amp; steering</p>
-              <ul class="specs">
-                <li>Liquid Spring Hydraulic Smart Suspension &mdash; 2&quot; front / 2&quot; rear w/ Tru Earth</li>
-                <li>Liquid Spring front HD sway bar</li>
-              </ul>
-              <p class="spec-head">Bumpers, boards &amp; recovery</p>
-              <ul class="specs">
-                <li>HD front bumper &mdash; gloss black</li>
-                <li>HD custom rear bumper &mdash; gloss black</li>
-                <li>AMP XL power running boards</li>
-                <li>WARN front winch 16.5 Ti synthetic</li>
-                <li>HD radiator skid plate &mdash; powder coated black</li>
-              </ul>
-              <p class="spec-head">Wheels &amp; tires</p>
-              <ul class="specs">
-                <li>4x two-piece aluminum military grade 20x11 wheels &mdash; powder coated 30/40 black satin</li>
-                <li>4x Goodyear G275 335/80R20 &mdash; 41&quot;</li>
-              </ul>
-              <p class="spec-head">Lighting</p>
-              <ul class="specs">
-                <li>Baja Designs Onyx 30&quot; straight light bar</li>
-                <li>Baja Designs 2x XL Sport front bumper lights</li>
-                <li>Baja Designs 2x XL80 front bumper lights</li>
-                <li>Baja Designs 2x Squadron flush mounts, rear</li>
-                <li>Baja HQ billet brake light with Baja Designs lighting</li>
-              </ul>
-              <p class="spec-head">Powertrain &amp; calibration</p>
-              <ul class="specs">
-                <li>Tru Speed speed-correct module for increased tire size</li>
-              </ul>
-              <p class="spec-head">Trim &amp; finish</p>
-              <ul class="specs">
-                <li>Ford factory Blackout package</li>
-                <li>Front custom fender flares &mdash; body color</li>
-              </ul>
-              <p class="spec-head">Available options</p>
-              <ul class="specs specs-option">
-                <li>PSC hydraulic steering system</li>
-                <li>68 gallon fuel tank replacement w/ module to correct miles to empty</li>
-                <li>Sound deadening package</li>
-                <li>PPF color change</li>
-              </ul>
-            </div>
-            <div class="tier-foot">
-              <p class="tier-price"><small>Starts at</small><strong>$183,300</strong><em>New 2027 Ford F-450 Lariat chassis, plus tax, license &amp; freight</em></p>
-              <a href="tel:+17606912588" class="btn btn-primary">Call to spec</a>
-            </div>
-          </div>
-        </article>
-
-        <article class="panel tier">
-          <div class="tier-photo">
-            <img src="media/apex.jpg" alt="MAV Apex build" loading="lazy">
-          </div>
-          <div class="tier-body">
-            <div class="tier-head">
-              <h2 class="tier-name">Apex</h2>
-              <p class="tier-size">44&quot; tires</p>
-            </div>
-            <p class="tier-line">Forty-four inch Goodyears, four-inch LiquidSpring smart hydraulic suspension, big-bore steering and the big-brake kit &mdash; everything the Summit is, standing taller.</p>
-            <div class="spec-set">
-              <p class="spec-head">Suspension &amp; steering</p>
-              <ul class="specs">
-                <li>Liquid Spring Hydraulic Smart Suspension &mdash; 4&quot; front / 4&quot; rear w/ Tru Earth</li>
-                <li>Liquid Spring front HD sway bar</li>
-                <li>PSC hydraulic steering system</li>
-              </ul>
-              <p class="spec-head">Bumpers, boards &amp; recovery</p>
-              <ul class="specs">
-                <li>HD front bumper &mdash; gloss black</li>
-                <li>HD custom rear bumper &mdash; gloss black</li>
-                <li>AMP XL power running boards</li>
-                <li>WARN front winch 16.5 Ti synthetic</li>
-                <li>HD radiator skid plate &mdash; powder coated black</li>
-              </ul>
-              <p class="spec-head">Wheels &amp; tires</p>
-              <ul class="specs">
-                <li>4x two-piece aluminum military grade 20x11 wheels &mdash; powder coated 30/40 black satin</li>
-                <li>4x Goodyear G275 365/80R20 &mdash; 44&quot;</li>
-              </ul>
-              <p class="spec-head">Lighting</p>
-              <ul class="specs">
-                <li>Baja Designs Onyx 30&quot; straight light bar</li>
-                <li>Baja Designs 2x XL Sport front bumper lights</li>
-                <li>Baja Designs 2x XL80 front bumper lights</li>
-                <li>Baja Designs 2x Squadron flush mounts, rear</li>
-                <li>Baja HQ billet brake light with Baja Designs lighting</li>
-              </ul>
-              <p class="spec-head">Powertrain &amp; calibration</p>
-              <ul class="specs">
-                <li>Tru Speed speed-correct module for increased tire size</li>
-              </ul>
-              <p class="spec-head">Trim &amp; finish</p>
-              <ul class="specs">
-                <li>Ford factory Blackout package</li>
-                <li>Front custom fender flares &mdash; body color</li>
-              </ul>
-              <p class="spec-head">Available options</p>
-              <ul class="specs specs-option">
-                <li>68 gallon fuel tank replacement w/ module to correct miles to empty</li>
-                <li>Sound deadening package</li>
-                <li>PPF color change</li>
-              </ul>
-            </div>
-            <div class="tier-foot">
-              <p class="tier-price"><small>Starts at</small><strong>$199,300</strong><em>New 2027 Ford F-450 Lariat chassis, plus tax, license &amp; freight</em></p>
-              <a href="tel:+17606912588" class="btn btn-primary">Call to spec</a>
-            </div>
-          </div>
-        </article>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- Both builds start here, so it is worth saying once rather than twice. -->
-  <section class="band">
-    <div class="shell">
-      <div class="panel">
-        <p class="eyebrow">Every build</p>
-        <h2 class="panel-title panel-title-sm">What both trucks start with</h2>
-        <div class="steps">
-          <div class="step">
-            <p class="step-n">Base</p>
-            <h3>New Ford F-450</h3>
-            <p>Sourced through our 11+ commercial Ford dealer partners. Trim and color are yours to choose, subject to Ford availability.</p>
-          </div>
-          <div class="step">
-            <p class="step-n">Build</p>
-            <h3>Six to eight weeks</h3>
-            <p>Hand-finished at our 16,000 sq ft facility in San Diego County. The build never leaves our floor.</p>
-          </div>
-          <div class="step">
-            <p class="step-n">Terms</p>
-            <h3>30% to start</h3>
-            <p>30% of the conversion on signing, the truck when it reaches us, the balance and tax on delivery.</p>
-          </div>
-          <div class="step">
-            <p class="step-n">Delivery</p>
-            <h3>US &amp; Canada</h3>
-            <p>Transport to your door, or fly in and drive it home from the shop.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Three of ours, pulled from the same set as the gallery page so this
-       strip never falls back to stock. Full wall is at gallery.html. -->
-  <section class="band" id="gallery">
-    <div class="shell">
-      <div class="gallery">
-        <div class="gallery-item"><img src="media/gallery/view/g256.webp" alt="A finished MAV build" loading="lazy"></div>
-        <div class="gallery-item"><img src="media/gallery/view/g003.webp" alt="A finished MAV build" loading="lazy"></div>
-        <div class="gallery-item"><img src="media/gallery/view/g102.webp" alt="A finished MAV build" loading="lazy"></div>
-      </div>
-      <p class="actions actions-center" style="margin-top:28px">
-        <a href="gallery.html" class="btn btn-outline">Gallery</a>
-      </p>
     </div>
   </section>
 
   <section class="band band-last">
     <div class="shell">
       <div class="panel panel-center">
-        <h2 class="panel-title panel-title-sm">Ready when you are</h2>
-        <p class="panel-sub">Call and we&rsquo;ll spec it with you. No configurator required.</p>
+        <p class="eyebrow">Something else in mind</p>
+        <h2 class="panel-title panel-title-sm">Not on the list?</h2>
+        <p class="panel-sub">
+          F-550 cab and chassis, a flatbed, a camper build, or a part you want that is not here.
+          We build one at a time, so the answer is usually yes &mdash; it just needs a conversation
+          rather than a form.
+        </p>
         <div class="actions actions-center">
-          <a href="tel:+17606912588" class="btn btn-primary btn-lg">(760) 691-2588</a>
-          <a href="index.html#lineup" class="btn btn-outline">Back to the lineup</a>
+          <a href="tel:+17606912588" class="btn btn-dark btn-lg">(760) 691-2588</a>
+          <a href="index.html#contact" class="btn btn-outline">Leave us a note</a>
         </div>
       </div>
     </div>
@@ -428,6 +321,577 @@
   window.addEventListener("pageshow", function (e) {
     if (e.persisted) { isBack = true; window.restoreScroll(); }
   });
+
+  // =========================================================================
+  // THE CONFIGURATOR
+  //
+  // The engine is the one from the first configurator, which was sound: three
+  // price buckets, options carrying their own constraints, and a summary that
+  // recomputes from scratch on every change rather than trying to add and
+  // subtract its way along. What changed is where the options come from --
+  // they were written into the HTML by hand and are now read from the catalog
+  // the quote is written from.
+  //
+  // Two constraints survive from that version because they are still true:
+  //   * a color Ford does not offer on the chosen trim cannot be ordered, and
+  //     a trim change that strips the chosen color falls back to the first one
+  //     that IS available rather than leaving nothing selected;
+  //   * an option a package already carries as standard is shown as included
+  //     and not charged -- the PSC steering is standard on an Apex and sold on
+  //     a Summit, and the customer should see that rather than be told twice.
+  //
+  // A third is new. The four packages are two choices crossed with the trim:
+  // "Summit" means Summit Platinum on a Platinum truck and Summit
+  // Non-Platinum on a Lariat. The customer picks Summit or Apex; the trim
+  // decides the rest, which is the whole reason the packages were split.
+  // =========================================================================
+  (function () {
+    var elOpts = document.getElementById("cfgOpts");
+    if (!elOpts) return;
+    var elCfg = document.getElementById("cfg");
+    var elLoading = document.getElementById("cfgLoading");
+    var elFail = document.getElementById("cfgFail");
+    var elRows = document.getElementById("cfgRows");
+    var elTotal = document.getElementById("cfgTotal");
+    var elFine = document.getElementById("cfgFine");
+    var elGo = document.getElementById("cfgGo");
+    var ENDPOINT = "https://mav-crm-production.up.railway.app/api/configurator/catalog";
+
+    var elFrame = document.getElementById("cfgFrame");
+    var elImg = document.getElementById("cfgImg");
+    var elDots = document.getElementById("cfgDots");
+    var elTitle = document.getElementById("cfgTitle");
+    var elSubtitle = document.getElementById("cfgSubtitle");
+
+    // ----------------------------------------------------------------------
+    // THE PHOTOGRAPHS
+    //
+    // Three views of a finished truck, one set per package -- a black Summit
+    // and a white Apex, both shot on the studio sweep. They live here and not
+    // in the catalog because they are website assets: the CRM knows what a
+    // package costs and what is in it, not what it was photographed against.
+    //
+    // Order is Jon's: front three-quarter, side, rear three-quarter.
+    // ----------------------------------------------------------------------
+    // Bumped whenever the files behind these names change. Recropping them in
+    // place left browsers serving the old wide-margin versions from disk --
+    // a refresh re-fetches the page but not necessarily its images, so one
+    // package came back correct and the other did not, which looks like a
+    // bug in the page rather than a stale file. A new URL cannot be stale.
+    var PHOTO_V = "?v=4";
+
+    // The walk round the truck: three-quarter, head-on, flank, back.
+    var PHOTOS = {
+      Summit: [
+        { view: "Front", src: "media/configurator/summit-front.jpg" },
+        { view: "Head-on", src: "media/configurator/summit-nose.jpg" },
+        { view: "Side", src: "media/configurator/summit-side.jpg" },
+        { view: "Rear", src: "media/configurator/summit-rear.jpg" }
+      ],
+      Apex: [
+        { view: "Front", src: "media/configurator/apex-front.jpg" },
+        { view: "Head-on", src: "media/configurator/apex-nose.jpg" },
+        { view: "Side", src: "media/configurator/apex-side.jpg" },
+        { view: "Rear", src: "media/configurator/apex-rear.jpg" }
+      ]
+    };
+    for (var _pkg in PHOTOS) {
+      for (var _i = 0; _i < PHOTOS[_pkg].length; _i++) PHOTOS[_pkg][_i].src += PHOTO_V;
+    }
+
+    var cat = null;
+    var pick = { platform: null, trim: null, color: null, tier: null, delivery: null, addOns: {} };
+    // Which of the three the stage is showing. Kept across a package change:
+    // someone looking at the back of a Summit wants the back of the Apex.
+    var view = 0;
+    var shown = "";
+
+    function money(cents) {
+      return "$" + Math.round(cents / 100).toLocaleString("en-US");
+    }
+    function esc(s) {
+      return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    /**
+     * What this colour costs on the chosen trim, or null if that trim cannot
+     * have it. Both answers come from the same lookup so they cannot
+     * disagree -- a colour with no price for a trim is not offered on it.
+     */
+    function colorPrice(c, trim) {
+      if (!c || !trim) return null;
+      var v = c.trims ? c.trims[trim.id] : undefined;
+      return typeof v === "number" ? v : null;
+    }
+
+    /** Which of the four packages this tier means for the chosen trim. */
+    function pkg() {
+      if (!pick.tier || !pick.trim) return null;
+      for (var i = 0; i < cat.tiers.length; i++) {
+        if (cat.tiers[i].tier === pick.tier && cat.tiers[i].platinum === pick.trim.platinum) {
+          return cat.tiers[i];
+        }
+      }
+      return null;
+    }
+
+    /** Is this add-on already standard on the chosen package? */
+    function included(addOn) {
+      var p = pkg();
+      return !!p && p.includes.indexOf(addOn.id) !== -1;
+    }
+
+    // -----------------------------------------------------------------------
+    function totals() {
+      var p = pkg();
+      var truckSell =
+        (pick.trim ? pick.trim.msrpCents : 0) +
+        (colorPrice(pick.color, pick.trim) || 0) +
+        cat.fees.sourcingFeeCents;
+      var addOnCents = 0;
+      var chosen = [];
+      for (var i = 0; i < cat.addOns.length; i++) {
+        var a = cat.addOns[i];
+        // An add-on the package includes is not charged, and an add-on left
+        // selected after a tier change that includes it must not be either.
+        if (pick.addOns[a.id] && !included(a)) {
+          addOnCents += a.addOnPriceCents;
+          chosen.push(a);
+        }
+      }
+      var deliveryCents = pick.delivery && pick.delivery.cents ? pick.delivery.cents : 0;
+      return {
+        truckSell: truckSell,
+        vehicleAllIn: truckSell,
+        buildAllIn: p ? p.priceCents : 0,
+        addOnCents: addOnCents,
+        addOns: chosen,
+        deliveryCents: deliveryCents,
+        total: truckSell + (p ? p.priceCents : 0) + addOnCents + deliveryCents
+      };
+    }
+
+    function renderSummary() {
+      var t = totals();
+      var rows = "";
+      function row(k, v, sub) {
+        rows +=
+          '<div class="cfg-row' + (sub ? " cfg-sub-row" : "") + '">' +
+          '<span class="k">' + k + "</span>" +
+          '<span class="v">' + v + "</span></div>";
+      }
+      if (pick.trim) {
+        // MSRP and the paint upcharge as two lines, not one sum. The printed
+        // sheet quotes the bare trim, and a customer holding it should find
+        // that number here rather than a larger one they have to account for.
+        row(esc("2027 F-450 " + pick.trim.name) + " &mdash; Ford MSRP", money(pick.trim.msrpCents));
+        if (pick.color) {
+          var cp = colorPrice(pick.color, pick.trim);
+          row(
+            esc(pick.color.name),
+            cp ? "+" + money(cp) : "no cost",
+            true
+          );
+        }
+      }
+      if (pick.tier) row(esc(pick.tier) + " conversion", money(t.buildAllIn));
+      for (var i = 0; i < t.addOns.length; i++) {
+        row(esc(t.addOns[i].name), "+" + money(t.addOns[i].addOnPriceCents), true);
+      }
+      if (pick.delivery) {
+        row(
+          "Delivery",
+          pick.delivery.cents === 0 ? "Included" : t.deliveryCents ? money(t.deliveryCents) : "Quoted"
+        );
+      }
+      elRows.innerHTML = rows;
+      elTotal.textContent = money(t.total);
+      elFine.innerHTML =
+        "Plus sales tax, title and license. Ford MSRP is confirmed against the factory " +
+        "order when you place it; conversion pricing is ours and is held for your build." +
+        (pick.delivery && pick.delivery.cents === null ? " Shipping is quoted to your ZIP." : "");
+      elGo.disabled = !pkg();
+    }
+
+    // -----------------------------------------------------------------------
+    // Rendering. Every section is drawn the same way and the whole options
+    // column is redrawn on any change, because the alternative is patching
+    // individual cards and that is where the first version's bugs lived.
+    // -----------------------------------------------------------------------
+    function card(o) {
+      var cls = "cfg-card";
+      if (o.on) cls += " is-on";
+      if (o.locked) cls += " is-locked";
+      return (
+        "<button type=\"button\" class=\"" + cls + "\"" +
+        (o.disabled ? " disabled" : "") +
+        (o.locked || o.disabled ? "" : ' data-k="' + o.k + '" data-v="' + esc(o.v) + '"') +
+        ' aria-pressed="' + (o.on ? "true" : "false") + '">' +
+        (o.swatch ? '<span class="cfg-swatch" style="background:' + esc(o.swatch) + '"></span>' : "") +
+        '<span class="cfg-body"><span class="cfg-name">' + esc(o.name) + "</span>" +
+        (o.sub ? '<span class="cfg-sub">' + o.sub + "</span>" : "") +
+        "</span>" +
+        (o.price ? '<span class="cfg-price">' + o.price + "</span>" : "") +
+        "</button>"
+      );
+    }
+
+    function section(title, note, cards, two) {
+      return (
+        '<section class="cfg-sec"><h2>' + title + "</h2>" +
+        (note ? '<p class="cfg-note">' + note + "</p>" : "") +
+        '<div class="cfg-list' + (two ? " cfg-two" : "") + '">' + cards.join("") + "</div></section>"
+      );
+    }
+
+    /** The stage: the chosen package's photographs, and the switcher. */
+    function renderStage() {
+      var set = PHOTOS[pick.tier] || PHOTOS.Summit;
+      if (view >= set.length) view = 0;
+
+      var want = set[view].src;
+      if (want !== shown) {
+        // Fade through rather than blinking: the two photographs are the same
+        // truck from the same angle, and a hard cut reads as a glitch.
+        elFrame.classList.add("is-swapping");
+        var next = new Image();
+        next.onload = next.onerror = function () {
+          elImg.src = want;
+          elImg.alt = "MAV " + pick.tier + ", " + set[view].view.toLowerCase() + " view";
+          elFrame.classList.remove("is-swapping");
+        };
+        next.src = want;
+        shown = want;
+      }
+
+      var dots = "";
+      for (var k = 0; k < set.length; k++) {
+        dots +=
+          '<button type="button" class="cfg-dot' + (k === view ? " is-on" : "") + '"' +
+          ' data-view="' + k + '" aria-label="' + esc(set[k].view) + ' view"' +
+          ' aria-pressed="' + (k === view ? "true" : "false") + '"></button>';
+      }
+      elDots.innerHTML = dots;
+    }
+
+    /** The rail's own heading: what you are configuring, not what page it is. */
+    function renderHead() {
+      elTitle.textContent = "MAV " + (pick.tier || "");
+      elSubtitle.textContent =
+        "2027 Ford F-450 Crew Cab" + (pick.trim ? " " + pick.trim.name : "");
+    }
+
+    /** The other two views, fetched before they are asked for. */
+    function preload() {
+      var set = PHOTOS[pick.tier] || [];
+      for (var k = 0; k < set.length; k++) new Image().src = set[k].src;
+    }
+
+    function render() {
+      renderStage();
+      renderHead();
+      var out = "";
+      var i;
+
+      // --- platform --------------------------------------------------------
+      var cards = [];
+      for (i = 0; i < cat.platforms.length; i++) {
+        var pf = cat.platforms[i];
+        cards.push(
+          card({
+            k: "platform", v: pf.id, name: pf.name, sub: esc(pf.note),
+            on: pick.platform === pf.id, disabled: !pf.available
+          })
+        );
+      }
+      out += section("Chassis", "", cards);
+
+      // --- package ---------------------------------------------------------
+      cards = [];
+      var seen = {};
+      for (i = 0; i < cat.tiers.length; i++) {
+        var ti = cat.tiers[i];
+        // Four rows in the catalog, two choices on the page. The trim picks
+        // which half -- Platinum trucks take the Platinum parts list -- and
+        // since the two halves have cost the same since 2026-10-14 the card
+        // reads identically either way, which is why this can sit above the
+        // trim without the price moving under the customer.
+        if (!pick.trim || ti.platinum !== pick.trim.platinum) continue;
+        if (seen[ti.tier]) continue;
+        seen[ti.tier] = 1;
+        cards.push(
+          card({
+            k: "tier", v: ti.tier, name: ti.tier,
+            sub: ti.tier === "Summit" ? "2&Prime; lift &middot; 41&Prime; tires" : "4&Prime; lift &middot; 44&Prime; tires &middot; hydraulic steering",
+            price: money(ti.priceCents),
+            on: pick.tier === ti.tier
+          })
+        );
+      }
+      out += section("Build package", "Our conversion price, on top of the Ford. This is what changes the photograph.", cards, true);
+      // --- trim ------------------------------------------------------------
+      cards = [];
+      for (i = 0; i < cat.trims.length; i++) {
+        var tr = cat.trims[i];
+        cards.push(
+          card({
+            k: "trim", v: tr.id, name: tr.name, price: money(tr.msrpCents),
+            on: !!pick.trim && pick.trim.id === tr.id
+          })
+        );
+      }
+      out += section("Ford trim", "Ford&rsquo;s price for the truck itself, before our build.", cards, true);
+
+      // --- color -----------------------------------------------------------
+      cards = [];
+      var greyed = 0;
+      for (i = 0; i < cat.colors.length; i++) {
+        var c = cat.colors[i];
+        var cPrice = colorPrice(c, pick.trim);
+        var ok = !pick.trim || cPrice !== null;
+        if (!ok) greyed++;
+        cards.push(
+          card({
+            k: "color", v: c.id, name: c.name, swatch: c.hex,
+            price: cPrice ? "+" + money(cPrice) : "Included",
+            on: !!pick.color && pick.color.id === c.id, disabled: !ok
+          })
+        );
+      }
+      out += section(
+        "Exterior color",
+        // Only worth saying when something IS greyed out. Every trim takes
+        // every colour today, so the note explained a thing that was not on
+        // the screen; it comes back by itself the day one of them stops.
+        greyed
+          ? "Greyed out means Ford does not offer it on the " +
+            esc(pick.trim ? pick.trim.name : "selected trim") + "."
+          : "",
+        cards,
+        true
+      );
+
+
+      // --- what the truck has, system by system ----------------------------
+      //
+      // One section per system with a single card in it, ticked and locked.
+      // The package price covers all of it, so there is nothing to choose --
+      // it is shown because the customer is getting it, and because the
+      // difference between the packages lives here: a 2in lift on 41s
+      // against a 4in lift on 44s.
+      var p = pkg();
+      if (p) {
+        // Both options where the packages differ, with the one they are not
+        // getting greyed and named for the package that has it. A Summit
+        // buyer should be able to see the Apex rides on 44s without having
+        // to click Apex to find out.
+        var fs = cat.featureSections || [];
+        for (i = 0; i < fs.length; i++) {
+          cards = [];
+          for (var fo = 0; fo < fs[i].options.length; fo++) {
+            var opt = fs[i].options[fo];
+            var mine = !opt.tier || opt.tier === pick.tier;
+            cards.push(
+              card({
+                name: opt.name,
+                // The greyed row says which package has it, which is the
+                // only thing worth knowing about a row you cannot pick.
+                price: mine ? "Included" : esc(opt.tier).toUpperCase(),
+                on: mine,
+                locked: mine,
+                disabled: !mine
+              })
+            );
+          }
+          out += section(fs[i].section, "", cards);
+        }
+      }
+
+      // --- add-ons ---------------------------------------------------------
+      if (p) {
+        cards = [];
+        // Fitted to every truck. Listed among the options so somebody
+        // scanning for what to add can see what they already have.
+        for (i = 0; i < (cat.standardExtras || []).length; i++) {
+          cards.push(
+            card({ name: cat.standardExtras[i], price: "Included", on: true, locked: true })
+          );
+        }
+        for (i = 0; i < cat.addOns.length; i++) {
+          var a = cat.addOns[i];
+          var inc = included(a);
+          cards.push(
+            card({
+              k: "addon", v: a.id, name: a.name, sub: esc(a.category),
+              price: inc ? "Included" : "+" + money(a.addOnPriceCents),
+              on: inc || !!pick.addOns[a.id], locked: inc
+            })
+          );
+        }
+        out += section(
+          "Options",
+          "Everything above is in the package price. These are the extras.",
+          cards
+        );
+      }
+
+      // --- delivery --------------------------------------------------------
+      cards = [];
+      for (i = 0; i < cat.delivery.length; i++) {
+        var d = cat.delivery[i];
+        cards.push(
+          card({
+            k: "delivery", v: d.id, name: d.name, sub: esc(d.note),
+            price: d.cents === 0 ? "Included" : "Quoted",
+            on: !!pick.delivery && pick.delivery.id === d.id
+          })
+        );
+      }
+      out += section("Delivery", "", cards, true);
+
+      elOpts.innerHTML = out;
+      renderSummary();
+    }
+
+    // -----------------------------------------------------------------------
+    function choose(k, v) {
+      var i;
+      if (k === "platform") pick.platform = v;
+      if (k === "delivery") {
+        for (i = 0; i < cat.delivery.length; i++) if (cat.delivery[i].id === v) pick.delivery = cat.delivery[i];
+      }
+      if (k === "addon") pick.addOns[v] = !pick.addOns[v];
+      if (k === "tier") {
+        pick.tier = v;
+        preload();
+      }
+      if (k === "color") {
+        for (i = 0; i < cat.colors.length; i++) if (cat.colors[i].id === v) pick.color = cat.colors[i];
+      }
+      if (k === "trim") {
+        for (i = 0; i < cat.trims.length; i++) if (cat.trims[i].id === v) pick.trim = cat.trims[i];
+        // The chosen color may not exist on this trim any more. Falling back
+        // to the first one that does beats leaving the page with no color and
+        // a total that silently drops an upcharge.
+        if (colorPrice(pick.color, pick.trim) === null) pick.color = null;
+        if (!pick.color) {
+          for (i = 0; i < cat.colors.length; i++) {
+            if (colorPrice(cat.colors[i], pick.trim) !== null) { pick.color = cat.colors[i]; break; }
+          }
+        }
+      }
+      render();
+    }
+
+    elDots.addEventListener("click", function (e) {
+      var btn = e.target.closest ? e.target.closest(".cfg-dot") : null;
+      if (!btn) return;
+      view = parseInt(btn.dataset.view, 10) || 0;
+      renderStage();
+    });
+
+    // The arrows wrap, because three views in a ring is what the dots imply
+    // and a dead arrow at either end is a worse answer than coming round.
+    var arrows = document.querySelectorAll(".cfg-arrow");
+    Array.prototype.forEach.call(arrows, function (btn) {
+      btn.addEventListener("click", function () {
+        var n = (PHOTOS[pick.tier] || []).length || 1;
+        view = (view + parseInt(btn.dataset.step, 10) + n) % n;
+        renderStage();
+      });
+    });
+
+    elOpts.addEventListener("click", function (e) {
+      var btn = e.target.closest ? e.target.closest(".cfg-card") : null;
+      if (!btn || btn.disabled || !btn.dataset.k) return;
+      choose(btn.dataset.k, btn.dataset.v);
+    });
+
+    // -----------------------------------------------------------------------
+    // Handing off. The spec goes to the next page as data AND as the text the
+    // rep will read in the CRM, built here because this is the only place
+    // that knows what was shown -- rebuilding the wording on the server from
+    // a bag of ids is how the two come to disagree.
+    // -----------------------------------------------------------------------
+    elGo.addEventListener("click", function () {
+      var p = pkg();
+      if (!p) return;
+      var t = totals();
+      var lines = [
+        // Plain text: this becomes a message in the CRM thread, where an HTML
+        // entity would arrive as the literal characters "&mdash;".
+        "2027 Ford F-450 Crew Cab " + pick.trim.name + " — MSRP " + money(pick.trim.msrpCents),
+        "Color: " + pick.color.name +
+          (colorPrice(pick.color, pick.trim) ? " +" + money(colorPrice(pick.color, pick.trim)) : " (no cost)"),
+        pick.tier + " package (" + p.tier + " " + (p.platinum ? "Platinum" : "Non-Platinum") + ")"
+      ];
+      if (t.addOns.length) {
+        lines.push("Options:");
+        for (var i = 0; i < t.addOns.length; i++) {
+          lines.push("  - " + t.addOns[i].name + " +" + money(t.addOns[i].addOnPriceCents));
+        }
+      } else {
+        lines.push("Options: none");
+      }
+      lines.push("Delivery: " + pick.delivery.name);
+      lines.push("");
+      lines.push("Ford chassis: " + money(t.vehicleAllIn));
+      lines.push("Conversion: " + money(t.buildAllIn));
+      if (t.addOnCents) lines.push("Options: " + money(t.addOnCents));
+      lines.push("Total: " + money(t.total) + " plus sales tax, title and license");
+
+      try {
+        sessionStorage.setItem(
+          "mav_cfg",
+          JSON.stringify({
+            trim: pick.trim.name,
+            trimMsrp: pick.trim.msrpCents,
+            color: pick.color.name,
+            colorUpcharge: colorPrice(pick.color, pick.trim) || 0,
+            tier: pick.tier,
+            packageName: p.tier + " " + (p.platinum ? "Platinum" : "Non-Platinum"),
+            addOns: t.addOns.map(function (a) { return { name: a.name, cents: a.addOnPriceCents }; }),
+            delivery: pick.delivery.name,
+            vehicleAllIn: t.vehicleAllIn,
+            buildAllIn: t.buildAllIn,
+            addOnCents: t.addOnCents,
+            total: t.total,
+            spec: lines.join("\n")
+          })
+        );
+        sessionStorage.setItem("mav:forward", "1");
+      } catch (err) {}
+      window.location.href = "reserve.html";
+    });
+
+    // -----------------------------------------------------------------------
+    fetch(ENDPOINT)
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (data) {
+        cat = data;
+        // Defaults: the cheapest honest configuration, so the page opens on a
+        // real truck with a real price rather than on a set of empty questions.
+        pick.platform = cat.platforms[0].id;
+        pick.trim = cat.trims[0];
+        pick.color = cat.colors[0];
+        pick.tier = "Summit";
+        pick.delivery = cat.delivery[0];
+        elLoading.hidden = true;
+        elCfg.hidden = false;
+        // The page stops scrolling now: the configurator is exactly one
+        // window tall, the rail does its own scrolling, and there is nothing
+        // under the truck to reach. Set from here rather than in the markup
+        // on purpose -- if the catalog never arrives the page is a phone
+        // number and a footer, and that still has to scroll.
+        document.body.classList.add("cfg-locked");
+        render();
+        preload();
+      })
+      .catch(function () {
+        elLoading.hidden = true;
+        elFail.hidden = false;
+      });
+  })();
 </script>
 </body>
 </html>
