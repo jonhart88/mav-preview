@@ -674,6 +674,12 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
   .spec-clips figure + figure figcaption { border-left: 0; }
 }
 
+/* Two photographs filling a tall copy column. One landscape frame beside a
+   long block of text leaves the same gap lower down; two stacked fill it. */
+.panel-media-stack { display: grid; grid-template-rows: 1fr 1fr; }
+.panel-media-stack img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (max-width: 700px) { .panel-media-stack { grid-template-rows: auto auto; } }
+
 /* Three photographs across under a panel heading, one column on a phone.
    Its own rule rather than .spec-shots, which is a flush two-up strip bolted
    to the top edge of a panel -- this sits inside the padding with gaps. */
