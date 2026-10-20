@@ -651,6 +651,11 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
    dashboards side by side say nothing about which truck is which. The caption
    sits under its own clip rather than over it -- the thing being read in these
    frames is a small LCD, and an overlay would land on top of it. */
+/* One above the other, always. Side by side these sat half the height of
+   the brake panel beside them and the row looked unfinished; stacked, the
+   two panels come out level. It also doubles the size the meter is read at,
+   which was the argument for stacking them on a phone in the first place. */
+.spec-clips { grid-template-columns: 1fr; }
 .spec-clips figure { margin: 0; display: flex; flex-direction: column; }
 .spec-clips video {
   display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
@@ -661,18 +666,15 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
   font-size: 10.5px; letter-spacing: .11em; text-transform: uppercase;
   color: var(--muted); border-bottom: 1px solid var(--line);
 }
-/* The caption strip is a band across the panel, so the seam between the two
-   captions wants to line up with the seam between the two clips. */
-.spec-clips figure + figure figcaption { border-left: 1px solid var(--line); }
+/* Stacked, so the caption divider is horizontal like every other one. */
+.spec-clips figure + figure figcaption { border-left: 0; }
 
 /* One above the other on a phone. Two across puts the meter at about 51px,
    and the meter is the whole argument -- the brake photographs are pictures
    and survive being small, but a number has to be legible or it is decoration.
    The divider goes back to being horizontal when they stack. */
-@media (max-width: 560px) {
-  .spec-clips { grid-template-columns: 1fr; }
-  .spec-clips figure + figure figcaption { border-left: 0; }
-}
+/* The phone rule that used to force this has gone: they stack at every
+   width now, so there is nothing left for it to override. */
 
 /* Two photographs filling a tall copy column. One landscape frame beside a
    long block of text leaves the same gap lower down; two stacked fill it. */
