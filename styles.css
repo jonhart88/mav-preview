@@ -651,20 +651,17 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
    dashboards side by side say nothing about which truck is which. The caption
    sits under its own clip rather than over it -- the thing being read in these
    frames is a small LCD, and an overlay would land on top of it. */
-/* One above the other, always. Side by side these sat half the height of
-   the brake panel beside them and the row looked unfinished; stacked, the
-   two panels come out level. It also doubles the size the meter is read at,
-   which was the argument for stacking them on a phone in the first place. */
-.spec-clips { grid-template-columns: 1fr; }
+/* Two across, matching the photo strip. They stack on a phone, where half
+   of 343px would put the meter at 43px and nothing could be read. */
+.spec-clips { grid-template-columns: 1fr 1fr; }
+@media (max-width: 560px) { .spec-clips { grid-template-columns: 1fr; } }
 .spec-clips figure { margin: 0; display: flex; flex-direction: column; }
-/* 1328x554, which is 2.4:1, and the number is set by the meter rather than
-   chosen: this is the widest frame that still contains the whole Toptes body
-   top to bottom in BOTH clips. Tighter and the device gets cropped, which is
-   what 4:1 was doing; looser and the Tundra's meter -- the small one, because
-   that clip is 1080p -- drops under the ~80px width it needs to be read.
-   It draws 277px tall against the brake panel's 249px photo strip. */
+/* 4:3, the same shape as the brake photographs beside them, so the two
+   panels carry media blocks of identical size. Side by side each clip draws
+   332px rather than 664, so both crops are framed to land the meter at about
+   85px -- just over the width it needs to be read. */
 .spec-clips video {
-  display: block; width: 100%; aspect-ratio: 1328 / 554; object-fit: cover;
+  display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
   background: var(--ink);
 }
 /* The label sits ON its clip rather than in a row beneath it. Two caption
@@ -678,9 +675,12 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
   font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
   font-weight: 700; color: #fff;
 }
-/* A hairline between the two clips, since neither carries a caption border
-   any more. */
-.spec-clips figure + figure { border-top: 1px solid var(--line); }
+/* Side by side, so the divider is vertical; it turns horizontal when they
+   stack on a phone. */
+.spec-clips figure + figure { border-left: 1px solid var(--line); }
+@media (max-width: 560px) {
+  .spec-clips figure + figure { border-left: 0; border-top: 1px solid var(--line); }
+}
 
 /* One above the other on a phone. Two across puts the meter at about 51px,
    and the meter is the whole argument -- the brake photographs are pictures
