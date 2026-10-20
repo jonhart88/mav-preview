@@ -657,13 +657,14 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
    which was the argument for stacking them on a phone in the first place. */
 .spec-clips { grid-template-columns: 1fr; }
 .spec-clips figure { margin: 0; display: flex; flex-direction: column; }
-/* 4:1 -- the shape of the band across the dashboard that holds the sound
-   meter and the speedometer together. At 4:3 these drew 498px tall each, so
-   stacking them made this panel twice the height of the one beside it and
-   the whole row grew. At 4:1 they draw 166 and the row sits level, while the
-   meter still renders about 110px wide, above the 80px readable floor. */
+/* 1328x554, which is 2.4:1, and the number is set by the meter rather than
+   chosen: this is the widest frame that still contains the whole Toptes body
+   top to bottom in BOTH clips. Tighter and the device gets cropped, which is
+   what 4:1 was doing; looser and the Tundra's meter -- the small one, because
+   that clip is 1080p -- drops under the ~80px width it needs to be read.
+   It draws 277px tall against the brake panel's 249px photo strip. */
 .spec-clips video {
-  display: block; width: 100%; aspect-ratio: 4 / 1; object-fit: cover;
+  display: block; width: 100%; aspect-ratio: 1328 / 554; object-fit: cover;
   background: var(--ink);
 }
 /* The label sits ON its clip rather than in a row beneath it. Two caption
