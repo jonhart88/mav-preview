@@ -692,6 +692,7 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
 /* Two photographs filling a tall copy column. One landscape frame beside a
    long block of text leaves the same gap lower down; two stacked fill it. */
 .panel-media-stack { display: grid; grid-template-rows: 1fr 1fr; }
+.panel-media-stack > img { min-height: 0; }
 .panel-media-stack img { width: 100%; height: 100%; object-fit: cover; display: block; }
 @media (max-width: 700px) { .panel-media-stack { grid-template-rows: auto auto; } }
 
@@ -704,6 +705,18 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
    0px tracks alongside the two real ones. */
 .panel-split-lead { grid-template-columns: 1fr 1.25fr; }
 .panel-split-lead .panel-copy { padding: clamp(26px, 3vw, 44px); }
+/* The copy sets the height, not the photograph.
+   An <img> in a grid cell contributes its intrinsic height, and at a wide
+   viewport this one was taller than the words beside it -- 670px against
+   461 -- so the panel grew to the picture and the copy floated in the middle
+   of it. Out of the flow it contributes nothing, the row is the copy plus
+   its padding, and the photograph crops to fit. */
+.panel-split-lead .panel-media { position: relative; min-height: 300px; overflow: hidden; }
+.panel-split-lead .panel-media > img,
+.panel-split-lead .panel-media > .panel-media-stack {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+}
+.panel-split-lead .panel-media > img { object-fit: cover; }
 @media (max-width: 760px) { .panel-split-lead { grid-template-columns: 1fr; } }
 
 /* Three photographs across under a panel heading, one column on a phone.
