@@ -695,6 +695,17 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
 .panel-media-stack img { width: 100%; height: 100%; object-fit: cover; display: block; }
 @media (max-width: 700px) { .panel-media-stack { grid-template-rows: auto auto; } }
 
+/* The lead panel at the top of a page: tighter than the About-style split
+   it inherits from, and weighted towards the photograph.
+   Padding matches .spec-body (43.2px at 1440) so the eyebrow sits the same
+   distance down as it does in the panels below -- .panel-copy's own 57.6px
+   left a visibly bigger gap at the top of the page than anywhere under it.
+   Columns declared rather than auto-fit, which was producing two empty
+   0px tracks alongside the two real ones. */
+.panel-split-lead { grid-template-columns: 1fr 1.25fr; }
+.panel-split-lead .panel-copy { padding: clamp(26px, 3vw, 44px); }
+@media (max-width: 760px) { .panel-split-lead { grid-template-columns: 1fr; } }
+
 /* Three photographs across under a panel heading, one column on a phone.
    Its own rule rather than .spec-shots, which is a flush two-up strip bolted
    to the top edge of a panel -- this sits inside the padding with gaps. */
