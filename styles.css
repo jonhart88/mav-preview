@@ -696,6 +696,12 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
 .panel-media-stack img { width: 100%; height: 100%; object-fit: cover; display: block; }
 @media (max-width: 700px) { .panel-media-stack { grid-template-rows: auto auto; } }
 
+/* A content panel padded like the lead panel and the spec panels -- 44px at
+   a wide viewport rather than .panel's own 64. Used on the pages where those
+   sit together, because a 64px box directly under a 44px one reads as a
+   mistake. The dark call-to-action keeps the roomier default. */
+.panel-tight { padding: clamp(26px, 3vw, 44px); }
+
 /* The lead panel at the top of a page: tighter than the About-style split
    it inherits from, and weighted towards the photograph.
    Padding matches .spec-body (43.2px at 1440) so the eyebrow sits the same
