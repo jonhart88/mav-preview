@@ -23,7 +23,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=22">
+<link rel="stylesheet" href="styles.css?v=23">
 
 <link rel="canonical" href="https://mavconversions.com/">
 <meta property="og:type" content="website">
@@ -335,14 +335,25 @@
     <div class="shell">
       <div class="photo-card photo-card-wide reveal">
         <!-- No autoplay attribute: the film starts when it is scrolled to, not
-             when the page loads, which is also what keeps a 12MB download off
-             the critical path. It starts muted because no browser will play
-             audio at a visitor who has not asked for it -- the speaker lifts
-             that, and clicking the card does the same. poster= is a frame of
-             the clip itself, so the band is never empty. -->
-        <video id="filmVideo" src="media/film.mp4" poster="media/film.jpg"
+             when the page loads, which keeps the download off the critical
+             path. It ASKS for sound at that point and keeps a silent picture
+             if the browser refuses -- see the player script for why it cannot
+             simply be turned on. poster= is a frame of the clip itself, so the
+             band is never empty.
+             muted is still on the element: it is what makes the fallback play
+             at all, and the script clears it the moment it is allowed to. -->
+        <video id="filmVideo" src="media/film.mp4?v=2" poster="media/film.jpg?v=2"
                muted loop playsinline preload="metadata"
                aria-label="The MAV Conversions F-450 film"></video>
+        <!-- Only ever shown when the browser refused the audio. Hidden by
+             default so it never flashes at someone who got sound anyway. -->
+        <button class="film-prompt" id="filmPrompt" type="button" hidden>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/>
+          </svg>
+          Tap for sound
+        </button>
         <div class="film-controls">
           <button class="film-btn" id="filmPlay" type="button" aria-label="Play the film">
             <svg class="i-pause" width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
@@ -740,17 +751,74 @@
 
     playBtn.addEventListener("click", function (e) {
       e.stopPropagation();
-      if (film.paused) { pausedByHand = false; film.play().catch(function () {}); }
+      if (film.paused) { pausedByHand = false; playWanted(); }
       else { pausedByHand = true; film.pause(); }
     });
+
+    // Sound on arrival, and a way to silence it.
+    //
+    // Browsers will not simply do this. Chrome, Safari and Firefox all reject
+    // play() on an unmuted element until the visitor has interacted with the
+    // page, and there is no flag or attribute that opts out -- it is a policy,
+    // not a setting. So the film ASKS for audio every time it comes into view
+    // and falls back to a silent picture when refused, rather than calling
+    // play() on an unmuted element and leaving a dead frame when it rejects.
+    //
+    // When it is refused, the first click or key anywhere on the page is the
+    // gesture the browser wanted, and the sound comes up then. In practice a
+    // returning visitor usually gets audio immediately: Chrome remembers that
+    // this site plays media and stops asking.
+    var promptEl = document.getElementById("filmPrompt");
+    var wantsSound = true;   // until the visitor says otherwise
+    var refused = false;     // the browser said no, not the visitor
+
+    var showPrompt = function (on) {
+      refused = on;
+      if (promptEl) promptEl.hidden = !on;
+    };
 
     var setSound = function (on) {
       film.muted = !on;
       soundBtn.setAttribute("aria-pressed", String(on));
       soundBtn.setAttribute("aria-label", on ? "Turn sound off" : "Turn sound on");
+      if (on) showPrompt(false);
     };
-    soundBtn.addEventListener("click", function (e) { e.stopPropagation(); setSound(film.muted); });
-    film.closest(".photo-card").addEventListener("click", function () { setSound(film.muted); });
+
+    // Play, with audio if the browser will allow it. Muted is set BEFORE the
+    // retry rather than after the rejection lands, because the rejection is
+    // async and a second play() on an unmuted element would be refused too.
+    var playWanted = function () {
+      if (!wantsSound) { setSound(false); return film.play().catch(function () {}); }
+      film.muted = false;
+      return film.play().then(function () {
+        setSound(true);
+      }).catch(function () {
+        setSound(false);
+        showPrompt(true);
+        return film.play().catch(function () {});
+      });
+    };
+
+    // Any gesture at all lifts the block, so take the first one going.
+    var lift = function () {
+      if (!refused || !wantsSound) return;
+      film.muted = false;
+      film.play().then(function () { setSound(true); }).catch(function () { setSound(false); });
+    };
+    document.addEventListener("pointerdown", lift, true);
+    document.addEventListener("keydown", lift, true);
+
+    // The visitor's word overrides all of the above, in both directions.
+    var toggleSound = function () {
+      wantsSound = film.muted;
+      setSound(wantsSound);
+      if (wantsSound && film.paused) film.play().catch(function () {});
+    };
+    soundBtn.addEventListener("click", function (e) { e.stopPropagation(); toggleSound(); });
+    film.closest(".photo-card").addEventListener("click", toggleSound);
+    if (promptEl) {
+      promptEl.addEventListener("click", function (e) { e.stopPropagation(); wantsSound = true; lift(); });
+    }
 
     // Full screen. Three different APIs, in order of how current they are.
     // The iPhone needs the last one: Safari on iOS will not take an arbitrary
@@ -769,10 +837,11 @@
           (document.exitFullscreen || document.webkitExitFullscreen).call(document);
           return;
         }
-        // Going full screen is a clear "I want to watch this", so it plays --
-        // but the sound stays wherever the visitor left it rather than
-        // surprising a quiet room.
-        if (film.paused) { pausedByHand = false; film.play().catch(function () {}); }
+        // Going full screen is a clear "I want to watch this" AND the gesture
+        // the audio policy wants, so this is the one place sound is certain
+        // to come up -- unless the visitor has already asked for silence.
+        if (film.paused) { pausedByHand = false; }
+        playWanted();
         if (card.requestFullscreen) { card.requestFullscreen().catch(function () {}); }
         else if (card.webkitRequestFullscreen) { card.webkitRequestFullscreen(); }
         else if (film.webkitEnterFullscreen) { film.webkitEnterFullscreen(); }
@@ -799,9 +868,12 @@
     var watch = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
-          if (!pausedByHand && !stillMotion) { film.play().catch(function () {}); }
+          if (!pausedByHand && !stillMotion) { playWanted(); }
         } else if (!film.paused) {
           film.pause();
+          // Scrolling away is not a decision about sound, so the prompt goes
+          // rather than sitting on a paused frame two screens up.
+          showPrompt(false);
         }
       });
     }, { threshold: 0.35 });
