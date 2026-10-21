@@ -23,7 +23,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=23">
+<link rel="stylesheet" href="styles.css?v=24">
 
 <link rel="canonical" href="https://mavconversions.com/">
 <meta property="og:type" content="website">
@@ -815,7 +815,16 @@
       if (wantsSound && film.paused) film.play().catch(function () {});
     };
     soundBtn.addEventListener("click", function (e) { e.stopPropagation(); toggleSound(); });
-    film.closest(".photo-card").addEventListener("click", toggleSound);
+    // Clicking the picture can only ever ADD sound, never take it away.
+    // It used to toggle, which was right when the film was always silent and
+    // a click was how you heard it. Now that it arrives with sound, a toggle
+    // means one stray click on the video kills the audio -- and because that
+    // click also counts as the visitor asking for silence, it stays dead for
+    // the rest of the page. Turning it off is a deliberate act, so it belongs
+    // on the speaker button and nowhere else.
+    film.closest(".photo-card").addEventListener("click", function () {
+      if (film.muted) toggleSound();
+    });
     if (promptEl) {
       promptEl.addEventListener("click", function (e) { e.stopPropagation(); wantsSound = true; lift(); });
     }

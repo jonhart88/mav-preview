@@ -552,11 +552,14 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
 .photo-card {
   position: relative; overflow: hidden;
   border-radius: var(--radius);
-  /* A 21:9 letterbox is 147px tall on a 375px phone -- a sliver with a
-     two-line headline sitting in it. Below the tablets it opens up to the
-     shape of the footage itself, which is also the only ratio that shows the
-     film uncropped. */
-  aspect-ratio: 21 / 9;
+  /* The shape of the footage, so none of it is cropped.
+     This was 21:9, which is wider than any film that has gone in it. With
+     object-fit: cover that does not letterbox, it ENLARGES the video until
+     it fills the width and throws away the overflow -- about 12% off the top
+     and 12% off the bottom of a 16:9 clip. Trucks sit low in frame and it
+     was cutting their wheels off.
+     If a film ever goes in here that is not 16:9, this has to move with it. */
+  aspect-ratio: 16 / 9;
   display: flex; align-items: flex-end;
   color: #fff; isolation: isolate;
 }
@@ -635,7 +638,6 @@ html:not(.js) .hero-media img:first-child { opacity: 1; }
 .film-prompt[hidden] { display: none; }
 .photo-card:fullscreen .film-prompt { left: max(24px, 3vw); bottom: max(24px, 4vh); }
 
-@media (max-width: 700px) { .photo-card { aspect-ratio: 16 / 9; } }
 
 /* ---------- Specs ---------- */
 .specs { list-style: none; margin-top: 22px; display: grid; gap: 10px; }
