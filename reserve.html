@@ -3,6 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Meta Pixel Code -- base code only: one PageView per page.
+     Advanced Matching ("data matching" in Meta's setup email) is deliberately
+     NOT enabled. It reads values out of the forms on the page, hashes them and
+     sends them with the pageview; the reserve and build pages collect names,
+     emails and phone numbers, and sending those to Meta is the pattern behind
+     the CIPA and wiretapping suits being filed against California dealers.
+     Conversion events are not here either -- add those in a tag manager.
+     Disclosed in privacy-policy.html under "Cookies, tracking and advertising". -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window,document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1863578501471272');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt=""></noscript>
+<!-- End Meta Pixel Code -->
 <!-- Tab icon: orange mark on a black tile. It reads at 16px where a hairline
      mark on clear ground does not, and it looks the same whatever colour the
      tab strip is. PNGs are the fallback for browsers without SVG favicons. -->
