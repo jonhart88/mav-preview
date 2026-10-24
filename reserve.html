@@ -52,7 +52,7 @@ src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="styles.css?v=25">
+<link rel="stylesheet" href="styles.css?v=26">
 </head>
 <body class="no-hero">
 
@@ -112,6 +112,19 @@ src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt
               <input type="text" name="zip" autocomplete="postal-code" inputmode="numeric" maxlength="10">
             </label>
           </div>
+          <!-- Same question as the contact form, same reason: export rules
+               turn on the destination. It rides into the lead note, which the
+               CRM already builds out of ZIP and timeline. -->
+          <label>Where will the truck be registered?
+            <select name="destination" id="rvDest">
+              <option value="">Select one</option>
+              <option value="United States">United States</option>
+              <option value="Outside the United States">Outside the United States</option>
+            </select>
+          </label>
+          <label id="rvDestWrap" hidden>Which country?
+            <input type="text" name="destCountry" id="rvDestCountry" autocomplete="country-name">
+          </label>
           <label>When are you looking to order?
             <select name="timeline">
               <option value="">No particular hurry</option>
@@ -335,6 +348,14 @@ src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt
     var elEmpty = document.getElementById("rvEmpty");
     var elStatus = document.getElementById("rvStatus");
     var elSend = document.getElementById("rvSend");
+    var dest = document.getElementById("rvDest");
+    var destWrap = document.getElementById("rvDestWrap");
+    var destCountry = document.getElementById("rvDestCountry");
+
+    dest.addEventListener("change", function () {
+      destWrap.hidden = dest.value !== "Outside the United States";
+      if (destWrap.hidden) destCountry.value = "";
+    });
     var ENDPOINT = "https://mav-crm-production.up.railway.app/api/configurator/lead";
 
     var build = null;
@@ -414,6 +435,22 @@ src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt
         return;
       }
 
+      var destination = val("destination");
+      var destCountryVal = val("destCountry");
+      if (!destination) {
+        elStatus.textContent = "Please tell us where the truck will be registered.";
+        elStatus.className = "lead-status is-bad";
+        return;
+      }
+      if (destination === "Outside the United States" && !destCountryVal) {
+        elStatus.textContent = "Please add the country the truck will be registered in.";
+        elStatus.className = "lead-status is-bad";
+        return;
+      }
+      var where = destination + (destCountryVal ? " (" + destCountryVal + ")" : "");
+      var notesOut = "Where the truck will be registered: " + where;
+      if (val("notes")) notesOut += "\n" + val("notes");
+
       elSend.disabled = true;
       elStatus.textContent = "Sending…";
       elStatus.className = "lead-status";
@@ -427,7 +464,7 @@ src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt
           email: email,
           zip: val("zip"),
           timeline: val("timeline"),
-          notes: val("notes"),
+          notes: notesOut,
           smsConsent: d.get("smsConsent") === "yes",
           company: val("company"),
           spec: build.spec

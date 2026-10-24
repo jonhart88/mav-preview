@@ -46,7 +46,7 @@ src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=25">
+<link rel="stylesheet" href="styles.css?v=26">
 
 <link rel="canonical" href="https://mavconversions.com/">
 <meta property="og:type" content="website">
@@ -568,6 +568,22 @@ src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt
           </div>
           <label>Email
             <input type="email" name="email" autocomplete="email">
+          </label>
+          <!-- Asked because US export rules turn on the destination, and a
+               truck we cannot legally build is better known in the first
+               minute than after three phone calls and a spec. One click for
+               almost everybody; the country box only opens for the few who
+               need it. The answer is prepended to the message so it reaches
+               the CRM without a change at that end. -->
+          <label>Where will the truck be registered?
+            <select name="destination" id="leadDest">
+              <option value="">Select one</option>
+              <option value="United States">United States</option>
+              <option value="Outside the United States">Outside the United States</option>
+            </select>
+          </label>
+          <label id="leadDestWrap" hidden>Which country?
+            <input type="text" name="destCountry" id="leadDestCountry" autocomplete="country-name">
           </label>
           <label>What will you tow, and where do you take it?
             <textarea name="message" rows="3" required></textarea>
@@ -1153,6 +1169,17 @@ src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt
     var status = document.getElementById("leadStatus");
     var send = document.getElementById("leadSend");
     var ENDPOINT = "https://mav-crm-production.up.railway.app/api/chat/inquiry";
+    var dest = document.getElementById("leadDest");
+    var destWrap = document.getElementById("leadDestWrap");
+    var destCountry = document.getElementById("leadDestCountry");
+
+    // Only ask which country of the people for whom the question means
+    // something, and clear it on the way back so a changed mind cannot leave
+    // a stale country attached to a US build.
+    dest.addEventListener("change", function () {
+      destWrap.hidden = dest.value !== "Outside the United States";
+      if (destWrap.hidden) destCountry.value = "";
+    });
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
@@ -1169,6 +1196,18 @@ src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt
         status.textContent = "Leave a phone number or an email so we can reach you.";
         status.className = "lead-status is-bad"; return;
       }
+      var destination = (d.get("destination") || "").toString().trim();
+      var destCountryVal = (d.get("destCountry") || "").toString().trim();
+      if (!destination) {
+        status.textContent = "Please tell us where the truck will be registered.";
+        status.className = "lead-status is-bad"; return;
+      }
+      if (destination === "Outside the United States" && !destCountryVal) {
+        status.textContent = "Please add the country the truck will be registered in.";
+        status.className = "lead-status is-bad"; return;
+      }
+      var where = destination + (destCountryVal ? " (" + destCountryVal + ")" : "");
+      var body = "Where the truck will be registered: " + where + "\n\n" + message;
       send.disabled = true;
       status.textContent = "Sending…";
       status.className = "lead-status";
@@ -1176,7 +1215,7 @@ src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: name, phone: phone, email: email, message: message,
+          name: name, phone: phone, email: email, message: body,
           smsConsent: d.get("smsConsent") === "yes",
           company: (d.get("company") || "").toString()
         })

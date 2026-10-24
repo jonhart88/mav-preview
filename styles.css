@@ -1390,6 +1390,9 @@ body.lb-lock { overflow: hidden; }
 /* A select inherits none of the above on its own, and a native dropdown on a
    dark panel renders light-on-light in several browsers. */
 .lead-form select { appearance: none; -webkit-appearance: none; cursor: pointer; }
+/* A hidden label needs saying twice: `.lead-form label` sets display:block,
+   which beats the browser's own [hidden] rule and would leave it on screen. */
+.lead-form label[hidden] { display: none; }
 .lead-form select option { color: #111; background: #fff; }
 /* "Optional" beside a field label: present, but not shouting like the label. */
 .cfg-opt-label { font-weight: 400; text-transform: none; letter-spacing: normal; color: var(--muted-d); }
