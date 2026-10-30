@@ -167,18 +167,18 @@ src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt
     <img class="is-on" src="media/hero-4.jpg?v=1" style="--py:100%"
          alt="A white MAV Apex Ford F-450, with a person standing beside it showing its height"
          fetchpriority="high">
-    <img src="media/hero-1.jpg?v=2" style="--py:98%"
+    <img src="media/hero-1.jpg?v=3" style="--py:100%"
          alt="A MAV-converted Ford F-450" loading="lazy">
-    <!-- 93% rather than 77%: this and hero-4 are the two side elevations, so
-         they sit next to each other in the eye and any difference in how much
-         floor shows under the tires reads as one truck sagging. 93 puts this
-         truck's gap at 11.4% of the hero's height, the same as hero-4's, and
-         it holds within half a point from a laptop up to a wide desktop.
-         hero-1 and hero-3 are three-quarter views and are left alone -- the
-         same measurement does not mean the same thing in perspective. -->
+    <!-- All four frames show the same amount of floor under the tires (about
+         11% of the hero's height), so no truck appears to sag as the rotation
+         moves. --py does the work here; hero-1 and hero-3 held only 39px and
+         78px of floor between the tires and the photo's bottom edge, far less
+         than the ~140px needed, so their sweep was extended downward before
+         they could be framed this way. Re-cropping either photo is what to
+         undo if that floor ever looks wrong. -->
     <img src="media/hero-2.jpg?v=1" style="--py:93%"
          alt="A MAV Summit build" loading="lazy">
-    <img src="media/hero-3.jpg?v=1" style="--py:90%"
+    <img src="media/hero-3.jpg?v=2" style="--py:100%"
          alt="A MAV Apex build" loading="lazy">
   </div>
   <!-- Manual controls, so you are never waiting out the timer to see a frame.
