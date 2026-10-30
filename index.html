@@ -37,8 +37,10 @@ src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt
 
 <!-- PHOTOGRAPHY
      Every image lives in /media under a fixed name: drop a new file over the
-     old one and the site updates, no HTML edits. In use: hero-1/2/3.jpg (the
-     rotating hero), summit.jpg, apex.jpg, about-trio.jpg, film.jpg + film.mp4.
+     old one and the site updates, no HTML edits. In use: hero-1/2/3/4.jpg (the
+     rotating hero -- the number is just the file's name, the running order is
+     the order they appear in the markup, and hero-4 leads), summit.jpg,
+     apex.jpg, about-trio.jpg, film.jpg + film.mp4.
      The gallery page is separate -- it builds itself from
      media/gallery/manifest.json. All of it is MAV's own trucks now; the last
      stock placeholders are gone. -->
@@ -162,8 +164,11 @@ src="https://www.facebook.com/tr?id=1863578501471272&ev=PageView&noscript=1" alt
        plain object-position because the phone pans the horizontal across the
        truck, and the keyframes have to hold the vertical where it was set. -->
   <div class="hero-media" id="heroMedia">
-    <img class="is-on" src="media/hero-1.jpg?v=2" style="--py:98%"
-         alt="A MAV-converted Ford F-450" fetchpriority="high">
+    <img class="is-on" src="media/hero-4.jpg?v=1" style="--py:100%"
+         alt="A white MAV Apex Ford F-450, with a person standing beside it showing its height"
+         fetchpriority="high">
+    <img src="media/hero-1.jpg?v=2" style="--py:98%"
+         alt="A MAV-converted Ford F-450" loading="lazy">
     <img src="media/hero-2.jpg?v=1" style="--py:77%"
          alt="A MAV Summit build" loading="lazy">
     <img src="media/hero-3.jpg?v=1" style="--py:90%"
